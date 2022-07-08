@@ -12,28 +12,28 @@ import (
 	"strconv"
 )
 
-// Level defines log levels.
+// 日志级别
 type Level int8
 
 const (
-	// DebugLevel defines debug log level.
+	// 调试
 	DebugLevel Level = iota
-	// InfoLevel defines info log level.
+	// 信息
 	InfoLevel
-	// WarnLevel defines warn log level.
+	// 警告
 	WarnLevel
-	// ErrorLevel defines error log level.
+	// 错误
 	ErrorLevel
-	// FatalLevel defines fatal log level.
+	// 致命错误
 	FatalLevel
-	// PanicLevel defines panic log level.
+	// 异常
 	PanicLevel
-	// NoLevel defines an absent log level.
+	// defines an absent log level.
 	NoLevel
-	// Disabled disables the logger.
+	// 禁用
 	Disabled
 
-	// TraceLevel defines trace log level.
+	// 堆栈跟踪
 	TraceLevel Level = -1
 	// Values less than TraceLevel are handled as numbers.
 )
@@ -62,8 +62,7 @@ func (l Level) String() string {
 	return strconv.Itoa(int(l))
 }
 
-// ParseLevel converts a level string into a zerolog Level value.
-// returns an error if the input string does not match known values.
+// level检查
 func ParseLevel(levelStr string) (Level, error) {
 	switch levelStr {
 	case LevelFieldMarshalFunc(TraceLevel):
@@ -104,13 +103,7 @@ type Logger struct {
 	stack   bool
 }
 
-// New creates a root logger with given output writer. If the output writer implements
-// the LevelWriter interface, the WriteLevel method will be called instead of the Write
-// one.
-//
-// Each logging operation makes a single call to the Writer's Write method. There is no
-// guarantee on access serialization to the Writer. If your Writer is not thread safe,
-// you may consider using sync wrapper.
+// 日志写入器,分辨同步还是异步
 func New(w io.Writer) Logger {
 	if w == nil {
 		w = ioutil.Discard
