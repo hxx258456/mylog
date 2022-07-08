@@ -1,12 +1,5 @@
-/*
-   Copyright (c) 2022 hxx258456
-   github.com/hxx258456/mylog is licensed under Mulan PSL v2.
-   You can use this software according to the terms and conditions of the Mulan PSL v2.
-   You may obtain a copy of Mulan PSL v2 at:
-               http://license.coscl.org.cn/MulanPSL2
-   THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-   See the Mulan PSL v2 for more details.
-*/
+// Copyright (c) 2022 hxx258456
+// github.com/hxx258456/mylog is licensed under Mulan PSL v2.
 
 // mylog/utils.go 通用工具
 //
@@ -15,19 +8,13 @@ package mylog
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
 	"os/user"
+	"reflect"
 	"runtime"
 	"strings"
-)
-
-const (
-	LOG_TIME_FORMAT_YMDHMS        = "2006-01-02 15:04:05"
-	CONFIG_CHECK_RESULT_NG        = -1
-	CONFIG_CHECK_RESULT_OK        = 1
-	CONFIG_CHECK_RESULT_NOFILEDIR = 2
+	"unsafe"
 )
 
 // 获取当前用户Home目录
@@ -74,29 +61,22 @@ func homeWindows() (string, error) {
 	return home, nil
 }
 
-// 检查日志配置
-//  返回 1 代表检查OK, error为nil;
-//  返回 2 代表检查OK但LogFileDir为空，error为nil;
-//  返回 -9 代表检查失败，error非nil;
-func CheckConfig(logConfig *Config) (int, error) {
-	if logConfig == nil {
-		return CONFIG_CHECK_RESULT_NG, fmt.Errorf("日志配置不可为空")
-	}
-	if logConfig.LogFileNamePrefix == "" {
-		return CONFIG_CHECK_RESULT_NG, fmt.Errorf("日志文件名前缀不可为空")
-	}
-	if logConfig.LogFileMaxSizeM <= 0 {
-		return CONFIG_CHECK_RESULT_NG, fmt.Errorf("日志文件Size上限必须大于0")
-	}
-	if logConfig.LogLevelGlobal < LOG_LEVEL_DEBUG || logConfig.LogLevelGlobal >= log_level_max {
-		return CONFIG_CHECK_RESULT_NG, fmt.Errorf("全局日志级别不能超出有效范围")
-	}
-	// LogFileDir在本地模式下可以为空，服务器模式下不可为空
-	if logConfig.LogMod == LOG_MODE_SERVER && logConfig.LogFileDir == "" {
-		return CONFIG_CHECK_RESULT_NG, fmt.Errorf("服务器模式下日志目录不可为空")
-	}
-	if logConfig.LogMod == LOG_MODE_LOCAL && logConfig.LogFileDir == "" {
-		return CONFIG_CHECK_RESULT_NOFILEDIR, nil
-	}
-	return CONFIG_CHECK_RESULT_OK, nil
+func B2s(b []byte) string {
+	/* #nosec G103 */
+	return *(*string)(unsafe.Pointer(&b))
+}
+
+// S2b converts string to a byte slice without memory allocation.
+//
+// Note it may break if string and/or slice header will change
+// in the future go versions.
+func S2b(s string) (b []byte) {
+	/* #nosec G103 */
+	bh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	/* #nosec G103 */
+	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	bh.Data = sh.Data
+	bh.Cap = sh.Len
+	bh.Len = sh.Len
+	return b
 }

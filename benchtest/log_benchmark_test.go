@@ -1,105 +1,65 @@
-/*
-   Copyright (c) 2022 hxx258456
-   github.com/hxx258456/mylog is licensed under Mulan PSL v2.
-   You can use this software according to the terms and conditions of the Mulan PSL v2.
-   You may obtain a copy of Mulan PSL v2 at:
-               http://license.coscl.org.cn/MulanPSL2
-   THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-   See the Mulan PSL v2 for more details.
-*/
+// Copyright (c) 2022 hxx258456
+// github.com/hxx258456/mylog is licensed under Mulan PSL v2.
 
 package benchtest
 
 import (
+	"io/ioutil"
 	"log"
-	"os"
-	"sync"
 	"testing"
-	"time"
 
-	"github.com/hxx25846/mylog/mylog"
+	"github.com/ScottMansfield/nanolog"
+	"github.com/rs/zerolog"
 )
 
-func TestMain(m *testing.M) {
-	mylog.ClearDir("testdata")
-	m.Run()
-}
+func BenchmarkCompareToStdlib(b *testing.B) {
+	b.Run("Nanolog", func(b *testing.B) {
+		lw := nanolog.New()
+		lw.SetWriter(ioutil.Discard)
+		h := lw.AddLogger("foo thing bar thing %i64. Fubar %s foo. sadfasdf %u32 sdfasfasdfasdffds %u32.")
+		args := []interface{}{int64(1), "string", uint32(2), uint32(3)}
 
-func BenchmarkLogServer(b *testing.B) {
-	setupServerOnce.Do(setupServer)
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		mylog.Debugf("测试写入日志: %d", i+1)
-	}
-}
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			lw.Log(h, args...)
+		}
+	})
+	b.Run("Stdlib", func(b *testing.B) {
+		args := []interface{}{int64(1), "string", uint32(2), uint32(3)}
+		l := log.New(ioutil.Discard, "", 0)
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			l.Printf("foo thing bar thing %d. Fubar %s foo. sadfasdf %d sdfasfasdfasdffds %d.", args...)
+		}
+	})
+	b.Run("Zerolog_printf", func(b *testing.B) {
+		args := []interface{}{int64(1), "string", uint32(2), uint32(3)}
+		logger := zerolog.New(ioutil.Discard)
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			logger.Log().Msgf("foo thing bar thing %d. Fubar %s foo. sadfasdf %d sdfasfasdfasdffds %d.", args...)
 
-func BenchmarkLogLocal(b *testing.B) {
-	setupLocalOnce.Do(setupLocal)
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		mylog.Debugf("测试写入日志: %d", i+1)
-	}
-}
+		}
+	})
+	b.Run("Zerolog_field", func(b *testing.B) {
+		logger := zerolog.New(ioutil.Discard)
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			logger.Log().Int64("foo thing bar thing", 1).
+				Str("Fubar foo", "string").
+				Uint32("sadfasdf", 2).
+				Uint32("sdfasfasdfasdffds", 3).Msg("")
+		}
+	})
+	b.Run("Zerolog_context", func(b *testing.B) {
+		logger := zerolog.New(ioutil.Discard).With().
+			Int64("foo thing bar thing", 1).
+			Str("Fubar foo", "string").
+			Uint32("sadfasdf", 2).
+			Uint32("sdfasfasdfasdffds", 3).Logger()
 
-func BenchmarkLogGolang(b *testing.B) {
-	setupGolangrOnce.Do(setupGolang)
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		log.Printf("测试写入日志: %d", i+1)
-	}
-}
-
-var setupServerOnce sync.Once
-
-func setupServer() {
-	mylog.ClearDir("testdata")
-	logConfig := &mylog.Config{
-		LogForbidStdout:  true,
-		LogFileDir:       "testdata",
-		LogMod:           mylog.LOG_MODE_SERVER,
-		LogLevelGlobal:   mylog.LOG_LEVEL_DEBUG,
-		LogChnOverPolicy: mylog.LOG_CHN_OVER_POLICY_BLOCK,
-		LogFileMaxSizeM:  100,
-		LogChannelCap:    4096000,
-		LogLevelCtlPort:  "19300",
-	}
-	mylog.InitLogger(logConfig)
-	time.Sleep(3 * time.Second)
-	mylog.Debug("准备测试日志文件")
-}
-
-var setupLocalOnce sync.Once
-
-func setupLocal() {
-	mylog.ClearDir("testdata")
-	logConfig := &mylog.Config{
-		LogForbidStdout: true,
-		LogFileDir:      "testdata",
-		LogMod:          mylog.LOG_MODE_LOCAL,
-		LogLevelGlobal:  mylog.LOG_LEVEL_DEBUG,
-	}
-	mylog.InitLogger(logConfig)
-	time.Sleep(3 * time.Second)
-	mylog.Debug("准备测试日志文件")
-}
-
-var setupGolangrOnce sync.Once
-
-func setupGolang() {
-	mylog.ClearDir("testdata")
-	currentLogFile, err := os.OpenFile("testdata/test.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.SetOutput(currentLogFile)
-	// 日志前缀时间戳格式
-	log.SetFlags(log.Ldate | log.Ltime)
-	log.Println("准备测试日志文件")
-}
-
-func TestClearLogs(t *testing.T) {
-	mylog.ClearDir("testdata")
+		for i := 0; i < b.N; i++ {
+			logger.Log().Msg("")
+		}
+	})
 }
