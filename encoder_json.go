@@ -9,7 +9,7 @@ package mylog
 // JSON encoded byte stream.
 
 import (
-	"github.com/hxx25846/mylog/internal/pkg/json"
+	"github.com/hxx258456/mylog/internal/pkg/json"
 )
 
 var (
