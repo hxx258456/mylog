@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker/v3"
-	"github.com/hxx25846/mylog/mylog"
+	"github.com/hxx25846/mylog"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 )

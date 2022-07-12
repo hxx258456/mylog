@@ -9,7 +9,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/hxx25846/mylog/mylog"
+	"github.com/hxx25846/mylog"
 )
 
 // Logger is the global logger.
