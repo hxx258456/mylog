@@ -6,7 +6,7 @@
 package main
 
 import (
-    "github.com/hxx258456/mylog/mylog"
+    "github.com/hxx258456/mylog"
     "github.com/hxx258456/mylog/log"
 )
 
@@ -24,7 +24,7 @@ func main() {
 package main
 
 import (
-    "github.com/hxx258456/mylog/mylog"
+    "github.com/hxx258456/mylog"
     "github.com/hxx258456/mylog/log"
     "gopkg.in/natefinch/lumberjack.v2"
 )
@@ -53,7 +53,7 @@ func main() {
 package main
 
 import (
-    "github.com/hxx258456/mylog/mylog"
+    "github.com/hxx258456/mylog"
     "github.com/hxx258456/mylog/log"
 )
 

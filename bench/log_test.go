@@ -1,3 +1,5 @@
+// Copyright (c) 2022 hxx258456
+// github.com/hxx258456/mylog is licensed under Mulan PSL v2.
 package bench
 
 import (
@@ -6,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	mlog "github.com/hxx25846/mylog/log"
+	mlog "github.com/hxx258456/mylog/log"
 )
 
 func BenchmarkLogStr(b *testing.B) {

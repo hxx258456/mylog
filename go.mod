@@ -1,4 +1,4 @@
-module github.com/hxx25846/mylog
+module github.com/hxx258456/mylog
 
 go 1.18
 

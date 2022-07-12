@@ -1,3 +1,5 @@
+// Copyright (c) 2022 hxx258456
+// github.com/hxx258456/mylog is licensed under Mulan PSL v2.
 package json
 
 // JSONMarshalFunc is used to marshal interface to JSON encoded byte slice.
