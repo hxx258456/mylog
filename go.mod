@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/bxcodec/faker/v3 v3.8.0
 	github.com/mattn/go-colorable v0.1.12
+	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
